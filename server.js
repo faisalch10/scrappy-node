@@ -10,17 +10,20 @@ const { createObjectCsvWriter } = require('csv-writer');
 
   const cars = await page.evaluate(() => {
     const carElements = document.querySelectorAll(
-      '.vehica-car-card-row-wrapper'
+      '.vehica-car-card-row-wrapper.vehica-car'
     );
     const cars = [];
     carElements.forEach(element => {
+      const id = element.getAttribute('data-id');
       const name = element
         .querySelector('.vehica-car-card-row__name')
         .textContent.trim();
-      const imageLink = element
+      const srcsetAttribute = element
         .querySelector('.vehica-car-card__image')
         .querySelector('img')
-        .getAttribute('src');
+        .getAttribute('srcset');
+      const srcsetArray = srcsetAttribute.split(',');
+      const imageLink = srcsetArray[0].trim().split(' ')[0];
       const price = element
         .querySelector('.vehica-car-card__price-mobile')
         .textContent.trim();
@@ -39,7 +42,11 @@ const { createObjectCsvWriter } = require('csv-writer');
       const driveType = element
         .querySelector('.vehica-car-card__info__single:nth-child(5) span')
         .textContent.trim();
+      const link = element
+        .querySelector('.vehica-car-card-link')
+        .getAttribute('href');
       cars.push({
+        id,
         name,
         imageLink,
         price,
@@ -48,6 +55,7 @@ const { createObjectCsvWriter } = require('csv-writer');
         transmission,
         fuelType,
         driveType,
+        link,
       });
     });
     return cars;
@@ -58,6 +66,7 @@ const { createObjectCsvWriter } = require('csv-writer');
   const csvWriter = createObjectCsvWriter({
     path: 'cars.csv',
     header: [
+      { id: 'id', title: 'ID' },
       { id: 'name', title: 'Name' },
       { id: 'imageLink', title: 'Image Link' },
       { id: 'price', title: 'Price' },
@@ -66,6 +75,7 @@ const { createObjectCsvWriter } = require('csv-writer');
       { id: 'transmission', title: 'Transmission' },
       { id: 'fuelType', title: 'Fuel Type' },
       { id: 'driveType', title: 'Drive Type' },
+      { id: 'link', title: 'Link' },
     ],
   });
 
